@@ -1,0 +1,58 @@
+# uncompyle6 version 3.7.0
+# Python bytecode 2.4 (62061)
+# Decompiled from: Python 3.8.1 (tags/v3.8.1:1b293b6, Dec 18 2019, 22:39:24) [MSC v.1916 32 bit (Intel)]
+# Embedded file name: C:\Cygwin\home\toonpub\player_1_0_46_qa\toontown\src\safezone\TTPlayground.py
+from pandac.PandaModules import *
+from toontown.toonbase import ToontownGlobals
+import Playground, random
+from toontown.launcher import DownloadForceAcknowledge
+from direct.task.Task import Task
+from toontown.hood import ZoneUtil
+
+class TTPlayground(Playground.Playground):
+    __module__ = __name__
+
+    def __init__(self, loader, parentFSM, doneEvent):
+        Playground.Playground.__init__(self, loader, parentFSM, doneEvent)
+
+    def load(self):
+        Playground.Playground.load(self)
+
+    def unload(self):
+        Playground.Playground.unload(self)
+
+    def enter(self, requestStatus):
+        Playground.Playground.enter(self, requestStatus)
+        taskMgr.doMethodLater(1, self.__birds, 'TT-birds')
+
+    def exit(self):
+        Playground.Playground.exit(self)
+        taskMgr.remove('TT-birds')
+
+    def __birds(self, task):
+        base.playSfx(random.choice(self.loader.birdSound))
+        t = random.random() * 20.0 + 1
+        taskMgr.doMethodLater(t, self.__birds, 'TT-birds')
+        return Task.done
+
+    def doRequestLeave(self, requestStatus):
+        self.fsm.request('trialerFA', [requestStatus])
+
+    def enterDFA(self, requestStatus):
+        doneEvent = 'dfaDoneEvent'
+        self.accept(doneEvent, self.enterDFACallback, [requestStatus])
+        self.dfa = DownloadForceAcknowledge.DownloadForceAcknowledge(doneEvent)
+        hood = ZoneUtil.getCanonicalZoneId(requestStatus['hoodId'])
+        if hood == ToontownGlobals.MyEstate:
+            self.dfa.enter(base.cr.hoodMgr.getPhaseFromHood(ToontownGlobals.MyEstate))
+        elif hood == ToontownGlobals.GoofySpeedway:
+            self.dfa.enter(base.cr.hoodMgr.getPhaseFromHood(ToontownGlobals.GoofySpeedway))
+        elif hood == ToontownGlobals.PartyHood:
+            self.dfa.enter(base.cr.hoodMgr.getPhaseFromHood(ToontownGlobals.PartyHood))
+        else:
+            self.dfa.enter(5)
+
+    def showPaths(self):
+        from toontown.classicchars import CCharPaths
+        from toontown.toonbase import TTLocalizer
+        self.showPathPoints(CCharPaths.getPaths(TTLocalizer.Mickey))

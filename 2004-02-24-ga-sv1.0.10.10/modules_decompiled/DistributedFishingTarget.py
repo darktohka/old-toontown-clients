@@ -1,0 +1,88 @@
+# File: D (Python 2.2)
+
+from ShowBaseGlobal import *
+from PandaObject import *
+from ClockDelta import *
+from IntervalGlobal import *
+import DirectNotifyGlobal
+import DistributedNode
+import FSM
+import State
+import Mopath
+import ToontownGlobals
+import Actor
+import FishingTargetGlobals
+import random
+import math
+import Bubbles
+
+class DistributedFishingTarget(DistributedNode.DistributedNode):
+    notify = DirectNotifyGlobal.directNotify.newCategory('DistributedFishingTarget')
+    radius = 2.5
+    
+    def __init__(self, cr):
+        DistributedNode.DistributedNode.__init__(self, cr)
+        NodePath.__init__(self)
+        self.pond = None
+        self.centerPoint = (0, 0, 0)
+        self.maxRadius = 1.0
+        self.track = None
+
+    
+    def generate(self):
+        self.assign(render.attachNewNode('DistributedFishingTarget'))
+        shadow = loader.loadModel('phase_3/models/props/drop_shadow')
+        shadow.setPos(0, 0, -0.10000000000000001)
+        shadow.setScale(0.33000000000000002)
+        shadow.setColorScale(1, 1, 1, 0.75)
+        shadow.reparentTo(self)
+        self.bubbles = Bubbles.Bubbles(self, render)
+        self.bubbles.start()
+        DistributedNode.DistributedNode.generate(self)
+
+    
+    def disable(self):
+        if self.track:
+            self.track.finish()
+            self.track = None
+        
+        self.bubbles.destroy()
+        del self.bubbles
+        self.pond.removeTarget(self)
+        self.pond = None
+        DistributedNode.DistributedNode.disable(self)
+
+    
+    def delete(self):
+        del self.pond
+        DistributedNode.DistributedNode.delete(self)
+
+    
+    def setPondDoId(self, pondDoId):
+        self.pond = toonbase.tcr.doId2do[pondDoId]
+        self.pond.addTarget(self)
+        self.centerPoint = FishingTargetGlobals.getTargetCenter(self.pond.getArea())
+        self.maxRadius = FishingTargetGlobals.getTargetRadius(self.pond.getArea())
+
+    
+    def getDestPos(self, angle, radius):
+        x = radius * math.cos(angle) + self.centerPoint[0]
+        y = radius * math.sin(angle) + self.centerPoint[1]
+        z = self.centerPoint[2]
+        return (x, y, z)
+
+    
+    def setState(self, stateIndex, angle, radius, time, timeStamp):
+        ts = globalClockDelta.localElapsedTime(timeStamp)
+        pos = self.getDestPos(angle, radius)
+        if self.track and self.track.isPlaying():
+            self.track.finish()
+        
+        self.track = Sequence(LerpPosInterval(self, time - ts, Point3(*pos), blendType = 'easeInOut'))
+        self.track.start()
+
+    
+    def getRadius(self):
+        return self.radius
+
+

@@ -1,0 +1,17 @@
+# File: O (Python 2.2)
+
+ADPtrackLabel = 0.066000000000000003
+ADPcancelButton = 0.050000000000000003
+APfriendButton = 0.059999999999999998
+APwhisperButton = 0.059999999999999998
+APsecretsButton = 0.059999999999999998
+APgoToButton = 0.059999999999999998
+APignoreButton = 0.059999999999999998
+FSenterSecretTextPos = (0, 0, -0.27000000000000002)
+FSgotSecretPos = (0, 0, 0.37)
+FSgetSecretButton = 0.059999999999999998
+FSnextText = 1.0
+LTPDdirectButtonYesText = 0.050000000000000003
+LTPDdirectButtonNoText = 0.050000000000000003
+LTPDdirectFrameText = 0.059999999999999998
+SCOsubmenuOverlap = 2.0 / 3
