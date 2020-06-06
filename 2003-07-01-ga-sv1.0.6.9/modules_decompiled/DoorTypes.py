@@ -1,0 +1,8 @@
+# File: D (Python 2.2)
+
+EXT_STANDARD = 1
+INT_STANDARD = 2
+EXT_HQ = 3
+INT_HQ = 4
+EXT_HOUSE = 5
+INT_HOUSE = 6
